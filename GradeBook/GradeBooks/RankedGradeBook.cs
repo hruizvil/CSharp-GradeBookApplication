@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace GradeBook.GradeBooks
 {
@@ -16,18 +17,21 @@ namespace GradeBook.GradeBooks
         {
             if (Students.Count < 5) 
                 throw new InvalidOperationException("Ranked-grading requires a minimum of 5 students to work");
-            
-            var top20 = averageGrade * 0.8;
-            var top40 = averageGrade * 0.6;
-            var top60 = averageGrade * 0.4;
-            var top80 = averageGrade * 0.2;
 
-            if (averageGrade >= top20) return 'A';
-            else if (averageGrade < top20 || averageGrade >= top40)
+
+            // How many students does it take to drop a letter grade
+            var threshold = (int)Math.Ceiling(Students.Count * 0.2);
+            var grades = Students
+                .OrderByDescending(x => x.AverageGrade)
+                .Select(x => x.AverageGrade).ToList();
+
+            if (grades[threshold - 1] <= averageGrade)
+                return 'A';
+            else if (grades[threshold * 2 - 1] < averageGrade)
                 return 'B';
-            else if (averageGrade < top40 || averageGrade > top60)
+            else if (grades[threshold * 3 - 1] < averageGrade)
                 return 'C';
-            else if (averageGrade < top60 || averageGrade > top80)
+            else if (grades[threshold * 4 - 1] < averageGrade)
                 return 'D';
 
             //return base.GetLetterGrade(averageGrade);
